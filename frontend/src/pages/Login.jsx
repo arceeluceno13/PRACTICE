@@ -2,9 +2,12 @@ import React from "react";
 import axios from "axios";
 import { useNavigate, Link } from "react-router-dom";
 import { Formik, Form, Field, ErrorMessage } from "formik";
+import { useDispatch } from "react-redux";
+import { setUser } from "../slices/userSlice";
 
 function Login() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const initialValues = { username: "", password: "" };
 
@@ -20,7 +23,17 @@ function Login() {
       .post("http://localhost:3000/login", values)
       .then((res) => {
         if (res.data.token) {
+          // Save to Redux
+          dispatch(setUser({
+            id: res.data.user.id,
+            username: res.data.user.username,
+            email: res.data.user.email,
+            token: res.data.token,
+          }));
+          // Optionally save to localStorage for persistence
           localStorage.setItem("token", res.data.token);
+          localStorage.setItem("user_id", res.data.user.id);
+          localStorage.setItem("username", res.data.user.username);
           navigate("/dashboard");
         } else {
           alert("Login failed!");
@@ -46,10 +59,7 @@ function Login() {
           {({ isSubmitting }) => (
             <Form>
               <div className="mb-4">
-                <label
-                  htmlFor="username"
-                  className="block mb-2 text-sm font-medium text-gray-700"
-                >
+                <label htmlFor="username" className="block mb-2 text-sm font-medium text-gray-700">
                   Username:
                 </label>
                 <Field
@@ -58,17 +68,10 @@ function Login() {
                   id="username"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
                 />
-                <ErrorMessage
-                  name="username"
-                  component="div"
-                  className="text-red-500 text-sm"
-                />
+                <ErrorMessage name="username" component="div" className="text-red-500 text-sm" />
               </div>
               <div className="mb-6">
-                <label
-                  htmlFor="password"
-                  className="block mb-2 text-sm font-medium text-gray-700"
-                >
+                <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-700">
                   Password:
                 </label>
                 <Field
@@ -77,11 +80,7 @@ function Login() {
                   id="password"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
                 />
-                <ErrorMessage
-                  name="password"
-                  component="div"
-                  className="text-red-500 text-sm"
-                />
+                <ErrorMessage name="password" component="div" className="text-red-500 text-sm" />
               </div>
               <button
                 type="submit"
@@ -92,10 +91,7 @@ function Login() {
               </button>
               <div className="mt-4 text-center">
                 <span className="text-gray-600">Don't have an account? </span>
-                <Link
-                  to="/register"
-                  className="text-blue-600 hover:underline font-semibold"
-                >
+                <Link to="/register" className="text-blue-600 hover:underline font-semibold">
                   Register
                 </Link>
               </div>
