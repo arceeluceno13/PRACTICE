@@ -1,6 +1,16 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-const initialState = {
+function getStoredUser() {
+  try {
+    const token = localStorage.getItem('token');
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    return token && user ? { ...user, token } : null;
+  } catch {
+    return null;
+  }
+}
+
+const initialState = getStoredUser() || {
   id: null,
   username: null,
   email: null,
@@ -11,17 +21,11 @@ const userSlice = createSlice({
   name: 'user',
   initialState,
   reducers: {
-    setUser(state, action) {
-      state.id = action.payload.id;
-      state.username = action.payload.username;
-      state.email = action.payload.email;
-      state.token = action.payload.token;
+    setUser(_state, action) {
+      return action.payload;
     },
-    clearUser(state) {
-      state.id = null;
-      state.username = null;
-      state.email = null;
-      state.token = null;
+    clearUser() {
+      return { id: null, username: null, email: null, token: null };
     },
   },
 });
